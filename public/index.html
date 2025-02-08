@@ -9,129 +9,109 @@
 </head>
 <body>
 <!-- partial:index.partial.html -->
-<ol class="messages-list">
-  <li class="spacing"></li>
-  <li class="message">
-    <div class="message-bubble">
-      <div class="message-text">iOS/iMessage gradient effect, with css/svg</div>
-    </div>
-  </li>
-  <li class="message">
-    <div class="message-bubble">
-      <div class="message-text">and good performance</div>
-    </div>
-  </li>
-  <li class="message">
-    <div class="message-bubble">
-      <div class="message-text">Scroll down to better see the effect.</div>
-    </div>
-  </li>
-  <li class="spacing"></li>
-  <li class="message">
-    <div class="message-bubble">
-      <div class="message-text">well, since I need to add some messages here so it scrolls, i might as well explain how it works</div>
-    </div>
-  </li>
-  <li class="message">
-    <div class="message-bubble">
-      <div class="message-text">it's a bit tricky.</div>
-    </div>
-  </li>
-  <li class="spacing"></li>
-  <li class="message">
-    <div class="message-bubble">
-      <div class="message-text">there's a big gradient background, that spans the entire window</div>
-    </div>
-  </li>
-  <li class="message">
-    <div class="message-bubble">
-      <div class="message-text">the white background you see is actually being added on each message </div>
-    </div>
-  </li>
-  <li class="message">
-    <div class="message-bubble">
-      <div class="message-text">the bubble shape itself is not a blue bubble, but a white border with a transparent center</div>
-    </div>
-  </li>
-  <li class="spacing"></li>
-  <li class="message">
-    <div class="message-bubble">
-      <div class="message-text">Effectively, each message is a "window" through which one can take a peek at the background</div>
-    </div>
-  </li>
-  <li class="spacing"></li>
-  <li class="message">
-    <div class="message-bubble">
-      <div class="message-text">A little trick is used to give the bubble shape to the messages.</div>
-    </div>
-  </li>
-  <li class="message">
-    <div class="message-bubble">
-      <div class="message-text">they have an svg image as a border</div>
-    </div>
-  </li>
-  <li class="message">
-    <div class="message-bubble">
-      <div class="message-text">using the (little known?) "border-image-source" and "border-image-slice" css properties</div>
-    </div>
-  </li>
+<ul class="messages-list">
   <li class="spacing"></li>
   <li class="message message--friend">
     <div class="message-bubble">
-      <div class="message-text">ok cool</div>
+      <div class="message-text">Hello! How can I help you?</div>
     </div>
   </li>
-  <li class="message message--friend">
-    <div class="message-bubble">
-      <div class="message-text">why not use, like, background-attachment: fixed or something though?</div>
-    </div>
-  </li>
-  <li class="spacing"></li>
-  <li class="message">
-    <div class="message-bubble">
-      <div class="message-text">for performance reasons</div>
-    </div>
-  </li>
-  <li class="message">
-    <div class="message-bubble">
-      <div class="message-text">fixed background makes the browser redraw things every time it scrolls</div>
-    </div>
-  </li>
-  <li class="message">
-    <div class="message-bubble">
-      <div class="message-text">while doing it this way makes the browser do only a composite operation</div>
-    </div>
-  </li>
-  <li class="message">
-    <div class="message-bubble">
-      <div class="message-text">that's it, just move things around instead of redrawing them</div>
-    </div>
-  </li>
-  <li class="spacing"></li>
-  <li class="message">
-    <div class="message-bubble">
-      <div class="message-text">that's what I gather, anyway</div>
-    </div>
-  </li>
-  <li class="message">
-    <div class="message-bubble">
-      <div class="message-text">not completely sure</div>
-    </div>
-  </li>
-  <li class="message">
-    <div class="message-bubble">
-      <div class="message-text">might depend on the browser, gotta test a bit more</div>
-    </div>
-  </li>
-  <li class="spacing"></li>
-  <li class="message message--friend">
-    <div class="message-bubble">
-      <div class="message-text">ok cool</div>
-    </div>
-  </li>
-  <li class="spacing"></li>
-</ol>
+
+  <div class="messages-list-1">
+  </div>
+
+  
+  <div id="bubble" style="display: none">
+    <li class="spacing"></li>
+    <li class="message message--friend">
+      <div class="message-bubble">
+        <div class="message-text">Waiting for bot</div>
+      </div>
+    </li>
+  </div>
+
+
+</ul>
 <!-- partial -->
+
+<div id="message-input">
+  <input type="text" placeholder="iMessage" autofocus="" id="messageInput">
+  <button class="imessage">↑</button>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+<script>
+
+function sentMessageTemplate(message){
+  return `<li class="spacing"></li>
+  <li class="message">
+    <div class="message-bubble">
+      <div class="message-text">${message}</div>
+    </div>
+  </li>`
+}
+function receivedMessageTemplate(message){
+  return `<li class="spacing"></li>
+  <li class="message message--friend">
+    <div class="message-bubble">
+      <div class="message-text">${message}</div>
+    </div>
+  </li>`
+}
+
+function messageSent(message) {
+  let output = sentMessageTemplate(message); // Generate the message template
+  $('.messages-list-1').append(output); // Append the message to the list
+  showBubble()
+  callAPI(message)
+}
+
+function showBubble(){
+  $("#bubble").show()
+}
+function hideBubble(){
+  $("#bubble").hide()
+}
+
+$(document).ready(function() {
+  $('#messageInput').keypress(function(event) {
+      if (event.which === 13) { // Check if Enter key is pressed
+          event.preventDefault(); // Prevent form submission if inside a form
+          let message = $(this).val().trim(); // Get and trim the input value
+          if (message !== '') {
+              messageSent(message); // Call the messageSent function
+              $(this).val(''); // Clear the input field
+          }
+      }
+  });
+});
+
+function callAPI(message){
+  fetch("/chat", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({ text: message })
+})
+  .then(response => response.json()) // Assuming the response is JSON
+  .then(data => {
+    let responseText = data.text
+    responseText = marked.parse(responseText)
+
+    hideBubble()
+
+    let output = receivedMessageTemplate(responseText); // Generate the message template
+    $('.messages-list-1').append(output); // Append the message to the list
+
+  })
+  .catch(error => console.error("Error:", error));
+
+}
+
+</script>
   
 </body>
 </html>

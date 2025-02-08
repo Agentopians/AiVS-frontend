@@ -220,6 +220,9 @@ async function init(){
 init()
 
 app.all('/chat', async (req, res) => {
+  res.json({ text: "dio **merda**" });
+  /*
+
   console.log("Method:", req.method);
   console.log("Args:", req.query);
   console.log("Parsed JSON:", req.body);
@@ -246,6 +249,7 @@ app.all('/chat', async (req, res) => {
   }
 
   res.json({ text: output.content });
+  */
 });
 
 app.listen(port, () => {

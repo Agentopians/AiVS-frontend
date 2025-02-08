@@ -7,13 +7,11 @@ body {
   padding: 0;
   margin: 0;
   background: linear-gradient(#43cdf6, #0087fe);
-  width: 340px;
+  width: 50vw;
   margin: 0 auto;
-  height: 100vh;
-  max-height: 450px;
+  border: 0;
+  margin-bottom: 100px;
   overflow-y: scroll;
-  box-sizing: border-box;
-  border: 1px solid #aeaeae;
 }
 .spacing {
   height: 15px;
@@ -48,8 +46,9 @@ body {
   border-style: solid;
   border-right-width: 27.741935483870968px;
   border-image-slice: 31 43 31 31;
-  max-width: 200px;
-  border-image-source: url("data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4NCjxzdmcgdmVyc2lvbj0iMS4xIg0KCSB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB4bWxuczphPSJodHRwOi8vbnMuYWRvYmUuY29tL0Fkb2JlU1ZHVmlld2VyRXh0ZW5zaW9ucy8zLjAvIg0KCSB4PSIwcHgiIHk9IjBweCIgd2lkdGg9Ijk0cHgiIGhlaWdodD0iNjhweCIgdmlld0JveD0iMCAwIDk0IDY4IiBvdmVyZmxvdz0idmlzaWJsZSIgZW5hYmxlLWJhY2tncm91bmQ9Im5ldyAwIDAgOTQgNjgiDQoJIHhtbDpzcGFjZT0icHJlc2VydmUiPg0KPGRlZnM+DQo8L2RlZnM+DQo8cGF0aCBmaWxsPSIjRkZGRkZGIiBkPSJNMzEuNzMzLDBIMHYzMS43MzNDMCwxNC4yMDgsMTQuMjA4LDAsMzEuNzMzLDB6Ii8+DQo8cGF0aCBmaWxsPSIjRkZGRkZGIiBkPSJNMCwzNi4yNjdWNjhoMzEuNzMzQzE0LjIwOCw2OCwwLDUzLjc5MiwwLDM2LjI2N3oiLz4NCjxwYXRoIGZpbGw9IiNGRkZGRkYiIGQ9Ik00OS44NjcsNjhIOTMuNWMtMTQuNjY3LDAtMjEuNDI2LTUuNjE1LTIzLjIzMS03LjQzNEM2NC43NTIsNjUuMjAzLDU3LjYzNyw2OCw0OS44NjcsNjh6Ii8+DQo8cGF0aCBmaWxsPSIjRkZGRkZGIiBkPSJNNDkuODY3LDBDNjcuMzkzLDAsODEuNiwxNC4yMDgsODEuNiwzMS43MzN2NC41MzNDODEuNiw2NSw5MSw2OCw5My41LDY4VjBINDkuODY3eiIvPg0KPC9zdmc+DQo=");
+  max-width: 500px;
+  /*border-image-source: url("data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4NCjxzdmcgdmVyc2lvbj0iMS4xIg0KCSB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB4bWxuczphPSJodHRwOi8vbnMuYWRvYmUuY29tL0Fkb2JlU1ZHVmlld2VyRXh0ZW5zaW9ucy8zLjAvIg0KCSB4PSIwcHgiIHk9IjBweCIgd2lkdGg9Ijk0cHgiIGhlaWdodD0iNjhweCIgdmlld0JveD0iMCAwIDk0IDY4IiBvdmVyZmxvdz0idmlzaWJsZSIgZW5hYmxlLWJhY2tncm91bmQ9Im5ldyAwIDAgOTQgNjgiDQoJIHhtbDpzcGFjZT0icHJlc2VydmUiPg0KPGRlZnM+DQo8L2RlZnM+DQo8cGF0aCBmaWxsPSIjRkZGRkZGIiBkPSJNMzEuNzMzLDBIMHYzMS43MzNDMCwxNC4yMDgsMTQuMjA4LDAsMzEuNzMzLDB6Ii8+DQo8cGF0aCBmaWxsPSIjRkZGRkZGIiBkPSJNMCwzNi4yNjdWNjhoMzEuNzMzQzE0LjIwOCw2OCwwLDUzLjc5MiwwLDM2LjI2N3oiLz4NCjxwYXRoIGZpbGw9IiNGRkZGRkYiIGQ9Ik00OS44NjcsNjhIOTMuNWMtMTQuNjY3LDAtMjEuNDI2LTUuNjE1LTIzLjIzMS03LjQzNEM2NC43NTIsNjUuMjAzLDU3LjYzNyw2OCw0OS44NjcsNjh6Ii8+DQo8cGF0aCBmaWxsPSIjRkZGRkZGIiBkPSJNNDkuODY3LDBDNjcuMzkzLDAsODEuNiwxNC4yMDgsODEuNiwzMS43MzN2NC41MzNDODEuNiw2NSw5MSw2OCw5My41LDY4VjBINDkuODY3eiIvPg0KPC9zdmc+DQo=");*/
+  border-image-source: url("img/download.svg");
 }
 .message--friend .message-bubble {
   padding: 1px;
@@ -66,4 +65,75 @@ body {
   margin-bottom: -9px;
   font-family: "San Francisco", "Helvetica Neue", "Helvetica", "Arial", sans-serif;
   line-height: 1.3;
+}
+
+#message-input {
+  background-color: #F6F6F6;
+  border-top: 1px solid #CCCCCC;
+  display: flex;
+  flex-shrink: 1;
+  padding: 4px 8px;
+  position: relative;
+  min-height: min-content;
+  position: fixed;
+  width: 50vw;
+  left: 25vw;
+  bottom: 0;
+}
+#message-input button {
+  background-color: var(--sms-bg);
+  border: none;
+  border-radius: 18px;
+  color: white;
+  display: inline-block;
+  flex-basis: fit-content;
+  font-size: 1rem;
+  font-weight: bold;
+  line-height: 1em;
+  padding-left: 0.33rem;
+  text-align: center;
+  position: absolute;
+  right: 12px;
+  bottom: 10px;
+  width: 1.5em;
+  height: 1.5em;
+}
+#message-input button.imessage {
+  background: #3480F1;
+  /* Old browsers */
+  background: -moz-linear-gradient(top, #6EBFF5 0%, #3480F1 100%);
+  /* FF3.6-15 */
+  background: -webkit-linear-gradient(top, #6EBFF5 0%, #3480F1 100%);
+  /* Chrome10-25,Safari5.1-6 */
+  background: linear-gradient(to bottom, #6EBFF5 0%, #3480F1 100%);
+  /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr="#6EBFF5", endColorstr="#3480F1",GradientType=0 );
+  /* IE6-9 */
+  background-size: 100vw 100vh;
+  background-attachment: fixed;
+  top: 8px;
+
+}
+#message-input input {
+  border-color: #CCCCCC;
+  border-radius: 20px;
+  flex-basis: width;
+  padding: 2px calc(1.5em + 8px) 2px 8px;
+  width: 100%;
+}
+input {
+  background-color: white;
+  border: 1px solid #545454;
+  border-radius: 6px;
+  font-size: 1rem;
+  line-height: 1.5em;
+  min-height: 1.6em;
+  padding: 2px 4px;
+}
+input::placeholder {
+  color: #444;
+}
+input:focus {
+  box-shadow: none;
+  outline: none;
 }
