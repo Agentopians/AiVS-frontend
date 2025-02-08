@@ -22,7 +22,9 @@ import { ethers, Interface, JsonRpcProvider } from 'ethers';
 import * as fs from "fs";
 import * as readline from "readline";
 import { z } from "zod";
+
 import abi from "./abi.json";
+
 const bodyParser = require('body-parser');
 const express = require('express')
 const app = express()
@@ -30,6 +32,31 @@ const app = express()
 dotenv.config();
 
 type TransactionRequest = Parameters<CdpWalletProvider["sendTransaction"]>[0]
+
+import { createHelia } from 'helia' // TODO: fix this
+import { strings } from '@helia/strings'
+
+/**
+ * Stores the provided string on IPFS using Helia and returns the public gateway URL.
+ * Note: In a production app, you may want to initialize and reuse the Helia node
+ * rather than creating a new one on every call.
+ *
+ * @param {string} content - The string content to store on IPFS.
+ * @returns {Promise<string>} - A promise that resolves to the IPFS gateway URL.
+ */
+async function storeStringOnIPFS(content) {
+  // Create a Helia node (using default in-memory stores)
+  const helia = await createHelia()
+  // Initialize the strings API for Helia
+  const s = strings(helia)
+  // Add the string content to IPFS and get the resulting CID
+  const cid = await s.add(content)
+  // Shut down the node if you no longer need it (optional)
+  // await helia.stop()
+
+  // Return the URL for public retrieval via the ipfs.io gateway
+  return `https://ipfs.io/ipfs/${cid.toString()}`
+}
 
 /**
  * Validates that required environment variables are set
@@ -109,9 +136,9 @@ async function initializeAgent() {
     
     // CUSTOM ActionProvider TO CALL THE SMART CONTRACT
     const iface = new Interface(abi.abi);
-    async function storeMessage(message) {
+    async function storeMessage(metadataUrl) {
       // Encode the call data for store(message)
-      const data = iface.encodeFunctionData("store", [message]);
+      const data = iface.encodeFunctionData("createNewTask", [metadataUrl, 100, 1]);
 
       const to = process.env["CONTRACT_ADDRESS"]
       
@@ -119,7 +146,6 @@ async function initializeAgent() {
         return
       }
 
-    
       // Prepare the transaction object. You can also add gasLimit, gasPrice, etc.
       const tx: TransactionRequest = {
         to,
@@ -129,23 +155,25 @@ async function initializeAgent() {
       // Send the transaction using AgentKit’s walletProvider.
       // This call will internally sign the transaction (without exposing the private key)
       // and send it to the network.
+      let output = ""
       try {
         const txResponse = await walletProvider.sendTransaction(tx);
         console.log("Transaction sent. Hash:", txResponse);
 
         // Optionally wait for the transaction to be mined:
         const receipt = await walletProvider.waitForTransactionReceipt(txResponse);
-        console.log("Transaction mined. Receipt:", receipt);
+        output = "Transaction mined. Receipt: " + receipt
+
       } catch (error) {
         console.error("Error occurred while sending transaction:", error);
+        output = "Error occurred while sending transaction: " + error
       }
-
+      
+      return output;
     }
 
-    await storeMessage(42).catch(console.error);
-
     const SignMessageSchema = z.object({
-      message: z.string().describe("The message to sign. e.g. `hello world`"),
+      message: z.string().describe("Summary of the case"),
     });
     class MyActionProvider extends ActionProvider<WalletProvider> {
         constructor() {
@@ -159,17 +187,10 @@ async function initializeAgent() {
         })
         async myAction(args: z.infer<typeof SignMessageSchema>): Promise<string> {
           const { message } = args;
-          const signature = await walletProvider.signMessage(message);
 
-          const provider = new JsonRpcProvider("https://sepolia.base.org");
-          const signer = await provider.getSigner(walletProvider.getAddress());
-  
-          // Create a contract instance
-          const contract = new ethers.Contract(process.env["CONTRACT_ADDRESS"] ?? "", abi.abi, signer);
-  
-          // Call your contract function
-          const result = await contract.store(message);
-  
+          const metadataUrl = await storeStringOnIPFS(message)
+          
+          const result = await storeMessage(metadataUrl).catch(console.error);
 
           return `The payload signature ${result}`;
         }
@@ -178,36 +199,6 @@ async function initializeAgent() {
     }
     
     const myCustomActionProvider = () => new MyActionProvider();
-
-    /*
-
-    const myCustomActionProvider: customActionProvider<EvmWalletProvider>({
-      name: 'submitApplication',
-      description: 'Calls a specific function on my smart contract',
-      schema: z.object({
-        message: z.string().describe("The message to sign"),
-      }),
-      invoke: async (walletProvider, args: any) => {
-        const { message } = args;
-        const signature = await walletProvider.signMessage(message);
-        return `The payload signature ${signature}`;
-        /*
-
-        // Initialize ethers with the wallet's provider
-        const provider = new JsonRpcProvider("https://sepolia.base.org");
-        const signer = await provider.getSigner(wallet.address);
-
-        // Create a contract instance
-        const contract = new ethers.Contract(process.env["CONTRACT_ADDRESS"] ?? "", abi.abi, signer);
-
-        // Call your contract function
-        const result = await contract.store(...args);
-
-        return result;
-        /* *
-      },
-    });
-    */
     
     // Initialize AgentKit
     const agentkit = await AgentKit.from({
@@ -252,7 +243,8 @@ async function initializeAgent() {
         restating your tools' descriptions unless it is explicitly requested.
         You have to behave like a lawyer who's interested in collecting some evidences about a case.
         After a few messages ask the user if you should submit the application. If the user says yes, 
-        call the 'submitApplication' smart contract function with argument '1' (uint256).
+        call the 'submitApplication' smart contract function with an argument: a string 
+        containing the summary of the conversation with all the evidences collected written a bit like a lawyer would.
         `,
     });
 
