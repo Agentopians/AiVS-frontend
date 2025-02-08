@@ -3,7 +3,10 @@
   "compilerOptions": {
     "preserveSymlinks": true,
     "outDir": "./dist",
-    "rootDir": "."
+    "rootDir": ".",
+    "sourceMap": true,
+    "target": "es6",
+    "module": "commonjs"
   },
   "include": ["*.ts"]
 }

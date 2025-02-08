@@ -1,0 +1,14 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug TS Chatbot",
+      "runtimeArgs": ["-r", "ts-node/register"],
+      "args": ["./chatbot.ts"],
+      "cwd": "${workspaceFolder}",
+      "sourceMaps": true
+    }
+  ]
+}
