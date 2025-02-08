@@ -1,0 +1,1 @@
+curl -X POST https://autonome.alt.technology/test-miopyl/chat -H "Content-Type: application/json" -d '{"text": "blablaasdf"}'
