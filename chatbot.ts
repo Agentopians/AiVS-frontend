@@ -134,6 +134,7 @@ async function initializeAgent() {
         encourage them to implement it themselves using the CDP SDK + Agentkit, recommend they go to 
         docs.cdp.coinbase.com for more information. Be concise and helpful with your responses. Refrain from 
         restating your tools' descriptions unless it is explicitly requested.
+        You have to behave like a lawyer who's interested in collecting some evidences about a case.
         `,
     });
 
@@ -220,8 +221,8 @@ async function init(){
 init()
 
 app.all('/chat', async (req, res) => {
-  res.json({ text: "dio **merda**" });
-  /*
+  //res.json({ text: "dio **merda**" });
+  
 
   console.log("Method:", req.method);
   console.log("Args:", req.query);
@@ -249,7 +250,7 @@ app.all('/chat', async (req, res) => {
   }
 
   res.json({ text: output.content });
-  */
+  /**/
 });
 
 app.listen(port, () => {
