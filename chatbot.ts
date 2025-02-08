@@ -18,10 +18,11 @@ import { MemorySaver } from "@langchain/langgraph";
 import { createReactAgent } from "@langchain/langgraph/prebuilt";
 import { ChatOpenAI } from "@langchain/openai";
 import * as dotenv from "dotenv";
-import { ethers, Interface, JsonRpcProvider } from 'ethers';
+import { ethers, Interface } from 'ethers';
 import * as fs from "fs";
 import * as readline from "readline";
 import { z } from "zod";
+import { uploadStringToInfura } from './lib/ipfs'
 
 import abi from "./abi.json";
 
@@ -33,30 +34,6 @@ dotenv.config();
 
 type TransactionRequest = Parameters<CdpWalletProvider["sendTransaction"]>[0]
 
-import { createHelia } from 'helia' // TODO: fix this
-import { strings } from '@helia/strings'
-
-/**
- * Stores the provided string on IPFS using Helia and returns the public gateway URL.
- * Note: In a production app, you may want to initialize and reuse the Helia node
- * rather than creating a new one on every call.
- *
- * @param {string} content - The string content to store on IPFS.
- * @returns {Promise<string>} - A promise that resolves to the IPFS gateway URL.
- */
-async function storeStringOnIPFS(content) {
-  // Create a Helia node (using default in-memory stores)
-  const helia = await createHelia()
-  // Initialize the strings API for Helia
-  const s = strings(helia)
-  // Add the string content to IPFS and get the resulting CID
-  const cid = await s.add(content)
-  // Shut down the node if you no longer need it (optional)
-  // await helia.stop()
-
-  // Return the URL for public retrieval via the ipfs.io gateway
-  return `https://ipfs.io/ipfs/${cid.toString()}`
-}
 
 /**
  * Validates that required environment variables are set
@@ -133,7 +110,7 @@ async function initializeAgent() {
     };
 
     const walletProvider = await CdpWalletProvider.configureWithWallet(config);
-    
+
     // CUSTOM ActionProvider TO CALL THE SMART CONTRACT
     const iface = new Interface(abi.abi);
     async function storeMessage(metadataUrl) {
@@ -141,7 +118,7 @@ async function initializeAgent() {
       const data = iface.encodeFunctionData("createNewTask", [metadataUrl, 100, 1]);
 
       const to = process.env["CONTRACT_ADDRESS"]
-      
+
       if (!is0x(to) || !is0x(data)) {
         return
       }
@@ -151,7 +128,7 @@ async function initializeAgent() {
         to,
         data,
       };
-    
+
       // Send the transaction using AgentKit’s walletProvider.
       // This call will internally sign the transaction (without exposing the private key)
       // and send it to the network.
@@ -168,7 +145,7 @@ async function initializeAgent() {
         console.error("Error occurred while sending transaction:", error);
         output = "Error occurred while sending transaction: " + error
       }
-      
+
       return output;
     }
 
@@ -176,30 +153,30 @@ async function initializeAgent() {
       message: z.string().describe("Summary of the case"),
     });
     class MyActionProvider extends ActionProvider<WalletProvider> {
-        constructor() {
-            super("my-action-provider", []);
-        }
-    
-        @CreateAction({
-            name: "submitApplication",
-            description: "Submit the application for the case",
-            schema: SignMessageSchema,
-        })
-        async myAction(args: z.infer<typeof SignMessageSchema>): Promise<string> {
-          const { message } = args;
+      constructor() {
+        super("my-action-provider", []);
+      }
 
-          const metadataUrl = await storeStringOnIPFS(message)
-          
-          const result = await storeMessage(metadataUrl).catch(console.error);
+      @CreateAction({
+        name: "submitApplication",
+        description: "Submit the application for the case",
+        schema: SignMessageSchema,
+      })
+      async myAction(args: z.infer<typeof SignMessageSchema>): Promise<string> {
+        const { message } = args;
 
-          return `The payload signature ${result}`;
-        }
-    
-        supportsNetwork = (network: Network) => true;
+        const metadataUrl = await uploadStringToInfura(message)
+
+        const result = await storeMessage(metadataUrl).catch(console.error);
+
+        return `The payload signature ${result}`;
+      }
+
+      supportsNetwork = (network: Network) => true;
     }
-    
+
     const myCustomActionProvider = () => new MyActionProvider();
-    
+
     // Initialize AgentKit
     const agentkit = await AgentKit.from({
       walletProvider,
@@ -323,7 +300,7 @@ app.get('/', (req, res) => {
 app.use('/static', express.static('public'))
 
 let AGENT, CONFIG;
-async function init(){
+async function init() {
   const { agent, config } = await initializeAgent();
   AGENT = agent
   CONFIG = config
@@ -332,7 +309,7 @@ init()
 
 app.all('/chat', async (req, res) => {
   // res.json({ text: "dio **merda**" });
-  
+
   console.log("Method:", req.method);
   console.log("Args:", req.query);
   console.log("Parsed JSON:", req.body);
@@ -352,9 +329,9 @@ app.all('/chat', async (req, res) => {
   } catch (error) {
     if (error instanceof Error) {
       console.error("Error:", error.message);
-      output = {content: error.message}
+      output = { content: error.message }
     } else {
-      output = {content: "Generic error"}
+      output = { content: "Generic error" }
     }
   }
 
