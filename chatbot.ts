@@ -1,12 +1,16 @@
 import {
+  ActionProvider,
   AgentKit,
-  CdpWalletProvider,
-  wethActionProvider,
-  walletActionProvider,
-  erc20ActionProvider,
   cdpApiActionProvider,
   cdpWalletActionProvider,
+  CdpWalletProvider,
+  CreateAction,
+  erc20ActionProvider,
+  Network,
   pythActionProvider,
+  walletActionProvider,
+  WalletProvider,
+  wethActionProvider
 } from "@coinbase/agentkit";
 import { getLangChainTools } from "@coinbase/agentkit-langchain";
 import { HumanMessage } from "@langchain/core/messages";
@@ -14,13 +18,18 @@ import { MemorySaver } from "@langchain/langgraph";
 import { createReactAgent } from "@langchain/langgraph/prebuilt";
 import { ChatOpenAI } from "@langchain/openai";
 import * as dotenv from "dotenv";
+import { ethers, Interface, JsonRpcProvider } from 'ethers';
 import * as fs from "fs";
 import * as readline from "readline";
+import { z } from "zod";
+import abi from "./abi.json";
 const bodyParser = require('body-parser');
 const express = require('express')
 const app = express()
 
 dotenv.config();
+
+type TransactionRequest = Parameters<CdpWalletProvider["sendTransaction"]>[0]
 
 /**
  * Validates that required environment variables are set
@@ -52,6 +61,10 @@ function validateEnvironment(): void {
   if (!process.env.NETWORK_ID) {
     console.warn("Warning: NETWORK_ID not set, defaulting to base-sepolia testnet");
   }
+}
+
+function is0x(data: unknown): data is `0x${string}` {
+  return data !== undefined && typeof data === "string" && data.startsWith("0x")
 }
 
 // Add this right after imports and before any other code
@@ -93,15 +106,117 @@ async function initializeAgent() {
     };
 
     const walletProvider = await CdpWalletProvider.configureWithWallet(config);
+    
+    // CUSTOM ActionProvider TO CALL THE SMART CONTRACT
+    const iface = new Interface(abi.abi);
+    async function storeMessage(message) {
+      // Encode the call data for store(message)
+      const data = iface.encodeFunctionData("store", [message]);
 
+      const to = process.env["CONTRACT_ADDRESS"]
+      
+      if (!is0x(to) || !is0x(data)) {
+        return
+      }
+
+    
+      // Prepare the transaction object. You can also add gasLimit, gasPrice, etc.
+      const tx: TransactionRequest = {
+        to,
+        data,
+      };
+    
+      // Send the transaction using AgentKit’s walletProvider.
+      // This call will internally sign the transaction (without exposing the private key)
+      // and send it to the network.
+      try {
+        const txResponse = await walletProvider.sendTransaction(tx);
+        console.log("Transaction sent. Hash:", txResponse);
+
+        // Optionally wait for the transaction to be mined:
+        const receipt = await walletProvider.waitForTransactionReceipt(txResponse);
+        console.log("Transaction mined. Receipt:", receipt);
+      } catch (error) {
+        console.error("Error occurred while sending transaction:", error);
+      }
+
+    }
+
+    await storeMessage(42).catch(console.error);
+
+    const SignMessageSchema = z.object({
+      message: z.string().describe("The message to sign. e.g. `hello world`"),
+    });
+    class MyActionProvider extends ActionProvider<WalletProvider> {
+        constructor() {
+            super("my-action-provider", []);
+        }
+    
+        @CreateAction({
+            name: "submitApplication",
+            description: "Submit the application for the case",
+            schema: SignMessageSchema,
+        })
+        async myAction(args: z.infer<typeof SignMessageSchema>): Promise<string> {
+          const { message } = args;
+          const signature = await walletProvider.signMessage(message);
+
+          const provider = new JsonRpcProvider("https://sepolia.base.org");
+          const signer = await provider.getSigner(walletProvider.getAddress());
+  
+          // Create a contract instance
+          const contract = new ethers.Contract(process.env["CONTRACT_ADDRESS"] ?? "", abi.abi, signer);
+  
+          // Call your contract function
+          const result = await contract.store(message);
+  
+
+          return `The payload signature ${result}`;
+        }
+    
+        supportsNetwork = (network: Network) => true;
+    }
+    
+    const myCustomActionProvider = () => new MyActionProvider();
+
+    /*
+
+    const myCustomActionProvider: customActionProvider<EvmWalletProvider>({
+      name: 'submitApplication',
+      description: 'Calls a specific function on my smart contract',
+      schema: z.object({
+        message: z.string().describe("The message to sign"),
+      }),
+      invoke: async (walletProvider, args: any) => {
+        const { message } = args;
+        const signature = await walletProvider.signMessage(message);
+        return `The payload signature ${signature}`;
+        /*
+
+        // Initialize ethers with the wallet's provider
+        const provider = new JsonRpcProvider("https://sepolia.base.org");
+        const signer = await provider.getSigner(wallet.address);
+
+        // Create a contract instance
+        const contract = new ethers.Contract(process.env["CONTRACT_ADDRESS"] ?? "", abi.abi, signer);
+
+        // Call your contract function
+        const result = await contract.store(...args);
+
+        return result;
+        /* *
+      },
+    });
+    */
+    
     // Initialize AgentKit
     const agentkit = await AgentKit.from({
       walletProvider,
       actionProviders: [
         wethActionProvider(),
-        pythActionProvider(),
+        // pythActionProvider(),
         walletActionProvider(),
-        erc20ActionProvider(),
+        // erc20ActionProvider(),
         cdpApiActionProvider({
           apiKeyName: process.env.CDP_API_KEY_NAME,
           apiKeyPrivateKey: process.env.CDP_API_KEY_PRIVATE_KEY?.replace(/\\n/g, "\n"),
@@ -110,6 +225,7 @@ async function initializeAgent() {
           apiKeyName: process.env.CDP_API_KEY_NAME,
           apiKeyPrivateKey: process.env.CDP_API_KEY_PRIVATE_KEY?.replace(/\\n/g, "\n"),
         }),
+        myCustomActionProvider()
       ],
     });
 
@@ -135,6 +251,8 @@ async function initializeAgent() {
         docs.cdp.coinbase.com for more information. Be concise and helpful with your responses. Refrain from 
         restating your tools' descriptions unless it is explicitly requested.
         You have to behave like a lawyer who's interested in collecting some evidences about a case.
+        After a few messages ask the user if you should submit the application. If the user says yes, 
+        call the 'submitApplication' smart contract function with argument '1' (uint256).
         `,
     });
 
@@ -221,9 +339,8 @@ async function init(){
 init()
 
 app.all('/chat', async (req, res) => {
-  //res.json({ text: "dio **merda**" });
+  // res.json({ text: "dio **merda**" });
   
-
   console.log("Method:", req.method);
   console.log("Args:", req.query);
   console.log("Parsed JSON:", req.body);
