@@ -109,6 +109,8 @@ async function initializeAgent() {
       networkId: process.env.NETWORK_ID || "base-sepolia",
     };
 
+    console.log(config)
+
     const walletProvider = await CdpWalletProvider.configureWithWallet(config);
 
     // CUSTOM ActionProvider TO CALL THE SMART CONTRACT

@@ -1,117 +1,118 @@
 <!DOCTYPE html>
-<html lang="en" >
-<head>
-  <meta charset="UTF-8">
-  <title>iMessage gradient effect</title>
-  <link rel="stylesheet" href="https://public.codepenassets.com/css/normalize-5.0.0.min.css">
-<link rel="stylesheet" href="./style.css">
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>iMessage gradient effect</title>
+    <link rel="stylesheet" href="https://public.codepenassets.com/css/normalize-5.0.0.min.css" />
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <!-- partial:index.partial.html -->
+    <ul class="messages-list">
+      <li class="spacing"></li>
+      <li class="message message--friend">
+        <div class="message-bubble">
+          <div class="message-text">
+            Hello! How can I help you? Could you please explain your problem to me? I will try to
+            gather as much evidence as possible and then submit an application for your case🧑‍⚖️
+          </div>
+        </div>
+      </li>
 
-</head>
-<body>
-<!-- partial:index.partial.html -->
-<ul class="messages-list">
-  <li class="spacing"></li>
-  <li class="message message--friend">
-    <div class="message-bubble">
-      <div class="message-text">Hello! How can I help you? Could you please explain your problem to me? I will try to gather as much evidence as possible and then submit an application for your case🧑‍⚖️</div>
-    </div>
-  </li>
+      <div class="messages-list-1"></div>
 
-  <div class="messages-list-1">
-  </div>
-
-  
-  <div id="bubble" style="display: none">
-    <li class="spacing"></li>
-    <li class="message message--friend">
-      <div class="message-bubble">
-        <div class="message-text">Waiting for bot</div>
+      <div id="bubble" style="display: none">
+        <li class="spacing"></li>
+        <li class="message message--friend">
+          <div class="message-bubble">
+            <div class="message-text">Waiting for bot</div>
+          </div>
+        </li>
       </div>
-    </li>
-  </div>
+    </ul>
+    <!-- partial -->
 
+    <div id="message-input">
+      <input type="text" placeholder="iMessage" autofocus="" id="messageInput" />
+      <button class="imessage">↑</button>
+    </div>
 
-</ul>
-<!-- partial -->
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"
+      integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
-<div id="message-input">
-  <input type="text" placeholder="iMessage" autofocus="" id="messageInput">
-  <button class="imessage">↑</button>
-</div>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-
-<script>
-
-function sentMessageTemplate(message){
-  return `<li class="spacing"></li>
+    <script>
+      function sentMessageTemplate(message) {
+        return `<li class="spacing"></li>
   <li class="message">
     <div class="message-bubble">
       <div class="message-text">${message}</div>
     </div>
-  </li>`
-}
-function receivedMessageTemplate(message){
-  return `<li class="spacing"></li>
+  </li>`;
+      }
+      function receivedMessageTemplate(message) {
+        return `<li class="spacing"></li>
   <li class="message message--friend">
     <div class="message-bubble">
       <div class="message-text">${message}</div>
     </div>
-  </li>`
-}
-
-function messageSent(message) {
-  let output = sentMessageTemplate(message); // Generate the message template
-  $('.messages-list-1').append(output); // Append the message to the list
-  showBubble()
-  callAPI(message)
-}
-
-function showBubble(){
-  $("#bubble").show()
-}
-function hideBubble(){
-  $("#bubble").hide()
-}
-
-$(document).ready(function() {
-  $('#messageInput').keypress(function(event) {
-      if (event.which === 13) { // Check if Enter key is pressed
-          event.preventDefault(); // Prevent form submission if inside a form
-          let message = $(this).val().trim(); // Get and trim the input value
-          if (message !== '') {
-              messageSent(message); // Call the messageSent function
-              $(this).val(''); // Clear the input field
-          }
+  </li>`;
       }
-  });
-});
 
-function callAPI(message){
-  fetch("/chat", {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json"
-  },
-  body: JSON.stringify({ text: message })
-})
-  .then(response => response.json()) // Assuming the response is JSON
-  .then(data => {
-    let responseText = data.text
-    responseText = marked.parse(responseText)
+      function messageSent(message) {
+        let output = sentMessageTemplate(message); // Generate the message template
+        $(".messages-list-1").append(output); // Append the message to the list
+        showBubble();
+        callAPI(message);
+      }
 
-    hideBubble()
+      function showBubble() {
+        $("#bubble").show();
+      }
+      function hideBubble() {
+        $("#bubble").hide();
+      }
 
-    let output = receivedMessageTemplate(responseText); // Generate the message template
-    $('.messages-list-1').append(output); // Append the message to the list
+      $(document).ready(function () {
+        $("#messageInput").keypress(function (event) {
+          if (event.which === 13) {
+            // Check if Enter key is pressed
+            event.preventDefault(); // Prevent form submission if inside a form
+            let message = $(this).val().trim(); // Get and trim the input value
+            if (message !== "") {
+              messageSent(message); // Call the messageSent function
+              $(this).val(""); // Clear the input field
+            }
+          }
+        });
+      });
 
-  })
-  .catch(error => console.error("Error:", error));
+      function callAPI(message) {
+        fetch("/chat", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ text: message }),
+        })
+          .then(response => response.json()) // Assuming the response is JSON
+          .then(data => {
+            let responseText = data.text;
+            console.log(responseText);
 
-}
+            responseText = marked.parse(responseText);
 
-</script>
-  
-</body>
+            hideBubble();
+
+            let output = receivedMessageTemplate(responseText); // Generate the message template
+            $(".messages-list-1").append(output); // Append the message to the list
+          })
+          .catch(error => console.error("Error:", error));
+      }
+    </script>
+  </body>
 </html>

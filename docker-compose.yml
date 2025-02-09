@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  aivs_frontend:
+    build: .
+    ports:
+      - "3000:3000"
+    restart: always
+    environment:
+      OPENAI_API_KEY: $OPENAI_API_KEY
+      CDP_API_KEY_NAME: $CDP_API_KEY_NAME
+      CDP_API_KEY_PRIVATE_KEY: $CDP_API_KEY_PRIVATE_KEY
+      CONTRACT_ADDRESS: $CONTRACT_ADDRESS
+      THIRDWEB_CLIENT_ID: $THIRDWEB_CLIENT_ID
+      THIRDWEB_SECRET_KEY: $THIRDWEB_SECRET_KEY

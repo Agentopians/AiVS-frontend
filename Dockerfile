@@ -1,5 +1,5 @@
 # Stage 1: Build the application
-FROM node:18-alpine AS build
+FROM node:23-alpine AS build
 
 # Set working directory
 WORKDIR /app
@@ -8,13 +8,10 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install dependencies
-RUN npm install --legacy-peer-deps || yarn install
-
-# Copy the rest of the application code
-COPY . .
+RUN npm ci
 
 # Stage 2: Run the application
-FROM node:18-alpine
+FROM node:23-alpine
 
 # Set working directory
 WORKDIR /app
