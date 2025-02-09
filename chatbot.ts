@@ -22,7 +22,7 @@ import { ethers, Interface } from 'ethers';
 import * as fs from "fs";
 import * as readline from "readline";
 import { z } from "zod";
-import { uploadStringToInfura } from './lib/ipfs'
+import { uploadString } from './lib/ipfs'
 
 import abi from "./abi.json";
 
@@ -165,7 +165,7 @@ async function initializeAgent() {
       async myAction(args: z.infer<typeof SignMessageSchema>): Promise<string> {
         const { message } = args;
 
-        const metadataUrl = await uploadStringToInfura(message)
+        const metadataUrl = await uploadString(message)
 
         const result = await storeMessage(metadataUrl).catch(console.error);
 
