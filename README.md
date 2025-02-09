@@ -136,10 +136,16 @@ To assist with configuring your API keys, here are some useful documentation lin
 
 Once deployed, the chatbot interface enables users to interact with the custom agent. Some example commands include:
 
-- "Transfer a portion of your ETH to a random address"
-- "What is the price of BTC?"
-- "Deploy an NFT that will go super viral!"
-- "Deploy an ERC-20 token with total supply 1 billion"
+- **Legal Assistance:**  
+  - "My phone was stolen. What should I do?"  
+  - "I want to file a lawsuit against my landlord."  
+  - "How do I collect evidence for a contract dispute?"  
+  - "Can I sue someone for online harassment?"  
+
+- **Blockchain & Legal Actions:**  
+  - "Transfer a portion of my ETH to a legal fund."  
+  - "Deploy an NFT to prove ownership of my digital artwork."  
+  - "Generate a legally binding smart contract for a rental agreement."  
 
 As you interact with the chatbot, the custom agent processes your instructions and, if needed, triggers the AVS contract based on your confirmation to submit a case.
 
