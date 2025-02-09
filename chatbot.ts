@@ -115,7 +115,11 @@ async function initializeAgent() {
     const iface = new Interface(abi.abi);
     async function storeMessage(metadataUrl) {
       // Encode the call data for store(message)
-      const data = iface.encodeFunctionData("createNewTask", [metadataUrl, 100, 1]);
+      const data = iface.encodeFunctionData("createNewTask", [
+        metadataUrl,
+        100,  // QUORUM_THRESHOLD_PERCENTAGE
+        "0x01"  // Using hex string for the bytes representation
+      ]);
 
       const to = process.env["CONTRACT_ADDRESS"]
 
@@ -129,7 +133,7 @@ async function initializeAgent() {
         data,
       };
 
-      // Send the transaction using AgentKit’s walletProvider.
+      // Send the transaction using AgentKit's walletProvider.
       // This call will internally sign the transaction (without exposing the private key)
       // and send it to the network.
       let output = ""

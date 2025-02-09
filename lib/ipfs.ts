@@ -1,7 +1,12 @@
 import { ThirdwebStorage } from "@thirdweb-dev/storage";
+import dotenv from "dotenv";
 
+dotenv.config();
 // Initialize the Thirdweb Storage client
-const storage = new ThirdwebStorage();
+const storage = new ThirdwebStorage({
+  clientId: process.env.THIRDWEB_CLIENT_ID!,
+  secretKey: process.env.THIRDWEB_SECRET_KEY!,
+});
 
 // Upload a string to Thirdweb Storage
 export async function uploadString(inputString: string): Promise<string> {
