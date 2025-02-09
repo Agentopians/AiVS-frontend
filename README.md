@@ -1,6 +1,6 @@
 # AiVS Intake Clerk
 
-The **AiVS Intake Clerk** is a front-end chatbot application that serves as the entry point for the AiVS system. It provides a simple chat interface that communicates with a backend custom AVS (Automated Virtual System) agent. The agent leverages CDP APIs to interact with the blockchain and behaves like a lawyer—guiding users in collecting evidence to submit cases to the AVS contract.
+The **AiVS Intake Clerk** is a front-end chatbot application that serves as the entry point for the AiVS system. It provides a simple chat interface that communicates with a backend custom AVS (Autonomous Verifiable Service) agent. The agent leverages CDP APIs to interact with the blockchain and behaves like a lawyer—guiding users in collecting evidence to submit cases to the AVS contract.
 
 ![image](./img/1-2agentopians_AiVS.drawio.png)
 
