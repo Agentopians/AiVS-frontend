@@ -1,117 +1,178 @@
 <!DOCTYPE html>
-<html lang="en" >
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>iMessage gradient effect</title>
-  <link rel="stylesheet" href="https://public.codepenassets.com/css/normalize-5.0.0.min.css">
-<link rel="stylesheet" href="./style.css">
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Legal Assistant</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://unpkg.com/marked@4.0.0/marked.min.js"></script>
+    <style>
+        .chat-container {
+            height: calc(100vh - 180px);
+            background: linear-gradient(to bottom, #f3f4f6, #e5e7eb);
+        }
+        .message {
+            max-width: 80%;
+            margin: 8px;
+            padding: 12px 16px;
+            border-radius: 20px;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        .user-message {
+            background: linear-gradient(45deg, #6366f1, #4f46e5);
+            color: white;
+            margin-left: auto;
+            border-bottom-right-radius: 4px;
+        }
+        .assistant-message {
+            background: white;
+            color: #1f2937;
+            margin-right: auto;
+            border-bottom-left-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .messages-container {
+            scrollbar-width: thin;
+            scrollbar-color: #4338ca #e5e7eb;
+        }
+        .messages-container::-webkit-scrollbar {
+            width: 6px;
+        }
+        .messages-container::-webkit-scrollbar-track {
+            background: #e5e7eb;
+        }
+        .messages-container::-webkit-scrollbar-thumb {
+            background-color: #4338ca;
+            border-radius: 3px;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .typing-indicator {
+            display: flex;
+            padding: 12px 16px;
+            gap: 4px;
+        }
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background: #4338ca;
+            border-radius: 50%;
+            animation: typing 1s infinite;
+        }
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes typing {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-4px); }
+        }
+    </style>
 </head>
-<body>
-<!-- partial:index.partial.html -->
-<ul class="messages-list">
-  <li class="spacing"></li>
-  <li class="message message--friend">
-    <div class="message-bubble">
-      <div class="message-text">Hello! How can I help you? Could you please explain your problem to me? I will try to gather as much evidence as possible and then submit an application for your case🧑‍⚖️</div>
+<body class="bg-gray-50">
+    <div class="container mx-auto px-4 py-8 max-w-4xl">
+        <header class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-indigo-700 mb-2">AI Legal Assistant</h1>
+            <p class="text-gray-600">Your intelligent companion for legal consultation</p>
+        </header>
+
+        <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+            <div class="chat-container flex flex-col">
+                <div id="messages" class="messages-container flex-1 overflow-y-auto p-4">
+                    <!-- Initial message -->
+                    <div class="message assistant-message">
+                        Hello! I'm your AI Legal Assistant. How can I help you today? Please explain your situation, and I'll gather the necessary evidence for your case. 🧑‍⚖️
+                    </div>
+                </div>
+                
+                <div class="border-t border-gray-200 p-4">
+                    <div class="flex items-center gap-3">
+                        <textarea 
+                            id="input" 
+                            class="flex-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 resize-none"
+                            placeholder="Type your message here..."
+                            rows="2"
+                        ></textarea>
+                        <button 
+                            onclick="sendMessage()" 
+                            class="bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 transition-colors duration-200 flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                        >
+                            Send
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-  </li>
 
-  <div class="messages-list-1">
-  </div>
+    <script>
+        const input = document.getElementById('input');
+        const messages = document.getElementById('messages');
 
-  
-  <div id="bubble" style="display: none">
-    <li class="spacing"></li>
-    <li class="message message--friend">
-      <div class="message-bubble">
-        <div class="message-text">Waiting for bot</div>
-      </div>
-    </li>
-  </div>
+        input.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
 
+        function showTypingIndicator() {
+            const indicator = document.createElement('div');
+            indicator.className = 'message assistant-message typing-indicator';
+            indicator.innerHTML = `
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+            `;
+            indicator.id = 'typing-indicator';
+            messages.appendChild(indicator);
+            messages.scrollTop = messages.scrollHeight;
+        }
 
-</ul>
-<!-- partial -->
+        function removeTypingIndicator() {
+            const indicator = document.getElementById('typing-indicator');
+            if (indicator) indicator.remove();
+        }
 
-<div id="message-input">
-  <input type="text" placeholder="iMessage" autofocus="" id="messageInput">
-  <button class="imessage">↑</button>
-</div>
+        async function sendMessage() {
+            const text = input.value.trim();
+            if (!text) return;
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+            // Add user message
+            addMessage(text, 'user');
+            input.value = '';
 
-<script>
+            // Show typing indicator
+            showTypingIndicator();
 
-function sentMessageTemplate(message){
-  return `<li class="spacing"></li>
-  <li class="message">
-    <div class="message-bubble">
-      <div class="message-text">${message}</div>
-    </div>
-  </li>`
-}
-function receivedMessageTemplate(message){
-  return `<li class="spacing"></li>
-  <li class="message message--friend">
-    <div class="message-bubble">
-      <div class="message-text">${message}</div>
-    </div>
-  </li>`
-}
+            try {
+                const response = await fetch('/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ text }),
+                });
 
-function messageSent(message) {
-  let output = sentMessageTemplate(message); // Generate the message template
-  $('.messages-list-1').append(output); // Append the message to the list
-  showBubble()
-  callAPI(message)
-}
+                const data = await response.json();
+                
+                // Remove typing indicator and add assistant message
+                removeTypingIndicator();
+                addMessage(data.text, 'assistant');
+            } catch (error) {
+                console.error('Error:', error);
+                removeTypingIndicator();
+                addMessage('Sorry, there was an error processing your request.', 'assistant');
+            }
+        }
 
-function showBubble(){
-  $("#bubble").show()
-}
-function hideBubble(){
-  $("#bubble").hide()
-}
-
-$(document).ready(function() {
-  $('#messageInput').keypress(function(event) {
-      if (event.which === 13) { // Check if Enter key is pressed
-          event.preventDefault(); // Prevent form submission if inside a form
-          let message = $(this).val().trim(); // Get and trim the input value
-          if (message !== '') {
-              messageSent(message); // Call the messageSent function
-              $(this).val(''); // Clear the input field
-          }
-      }
-  });
-});
-
-function callAPI(message){
-  fetch("/chat", {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json"
-  },
-  body: JSON.stringify({ text: message })
-})
-  .then(response => response.json()) // Assuming the response is JSON
-  .then(data => {
-    let responseText = data.text
-    responseText = marked.parse(responseText)
-
-    hideBubble()
-
-    let output = receivedMessageTemplate(responseText); // Generate the message template
-    $('.messages-list-1').append(output); // Append the message to the list
-
-  })
-  .catch(error => console.error("Error:", error));
-
-}
-
-</script>
-  
+        function addMessage(text, type) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}-message`;
+            messageDiv.innerHTML = marked.parse(text);
+            messages.appendChild(messageDiv);
+            messages.scrollTop = messages.scrollHeight;
+        }
+    </script>
 </body>
 </html>

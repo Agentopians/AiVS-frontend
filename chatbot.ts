@@ -34,6 +34,8 @@ dotenv.config();
 
 type TransactionRequest = Parameters<CdpWalletProvider["sendTransaction"]>[0]
 
+// Add this before any other code
+(global as any).ReadableStream = ReadableStream;
 
 /**
  * Validates that required environment variables are set
@@ -107,6 +109,7 @@ async function initializeAgent() {
       apiKeyPrivateKey: process.env.CDP_API_KEY_PRIVATE_KEY?.replace(/\\n/g, "\n"),
       cdpWalletData: walletDataStr || undefined,
       networkId: process.env.NETWORK_ID || "base-sepolia",
+      rpcUrl: "https://lb.drpc.org/ogrpc?network=holesky&dkey=Ajl6LmfeqUsasCZzmEGNuSdsqRXj1n8R74uRKuk0h5Qw"
     };
 
     const walletProvider = await CdpWalletProvider.configureWithWallet(config);
@@ -127,15 +130,15 @@ async function initializeAgent() {
         return
       }
 
-      // Prepare the transaction object. You can also add gasLimit, gasPrice, etc.
+      // Prepare the transaction object with gas parameters
       const tx: TransactionRequest = {
         to,
         data,
+        gas: ethers.toBigInt(300000),  // Set a safe gas limit
+        maxFeePerGas: ethers.parseUnits("1.5", "gwei"),  // Base fee + priority fee
+        maxPriorityFeePerGas: ethers.parseUnits("1", "gwei"),  // Miner tip
       };
 
-      // Send the transaction using AgentKit's walletProvider.
-      // This call will internally sign the transaction (without exposing the private key)
-      // and send it to the network.
       let output = ""
       try {
         const txResponse = await walletProvider.sendTransaction(tx);
@@ -152,10 +155,6 @@ async function initializeAgent() {
 
       return output;
     }
-
-    const metadataUrl = await uploadString("ciao")
-
-    const result = await storeMessage(metadataUrl).catch(console.error);
 
     const SignMessageSchema = z.object({
       message: z.string().describe("Summary of the case"),
@@ -174,6 +173,7 @@ async function initializeAgent() {
         const { message } = args;
 
         const metadataUrl = await uploadString(message)
+        console.log("metadataUrl", metadataUrl)
 
         const result = await storeMessage(metadataUrl).catch(console.error);
 
@@ -301,11 +301,9 @@ app.use(bodyParser.json({
 
 const port = 3000
 
-app.get('/', (req, res) => {
-  res.send('Hello World!')
-})
+app.get('/', express.static('public'))
 
-app.use('/static', express.static('public'))
+
 
 let AGENT, CONFIG;
 async function init() {
