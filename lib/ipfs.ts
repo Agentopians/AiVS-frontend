@@ -1,25 +1,25 @@
-import { createHelia } from 'helia';
-import { strings } from '@helia/strings';
+import { ThirdwebStorage } from "@thirdweb-dev/storage";
 
-async function initializeHelia() {
-  const helia = await createHelia();
-  return strings(helia);
-}
+// Initialize the Thirdweb Storage client
+const storage = new ThirdwebStorage();
 
-const sPromise = initializeHelia(); // Store the promise for later use
-
+// Upload a string to Thirdweb Storage
 export async function uploadString(inputString: string): Promise<string> {
   try {
-    if (typeof inputString !== 'string') {
-      throw new Error('Invalid input: Expected a string.');
+    // Validate input
+    if (typeof inputString !== "string") {
+      throw new Error("Invalid input: Expected a string.");
     }
 
-    const s = await sPromise; // Wait for Helia to initialize
-    const cid = await s.add(inputString);
+    // Convert the string into a JSON object
+    const data = { content: inputString };
 
-    return cid.toString();
+    // Upload the data to Thirdweb Storage
+    const uri = await storage.upload(data);
+
+    return uri; // Return the URI (IPFS CID)
   } catch (error) {
-    console.error('Error uploading string to Helia:', error);
+    console.error("Error uploading string to Thirdweb Storage:", error);
     throw error;
   }
 }
