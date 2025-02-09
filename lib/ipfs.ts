@@ -10,6 +10,7 @@ const storage = new ThirdwebStorage({
 
 // Upload a string to Thirdweb Storage
 export async function uploadString(inputString: string): Promise<string> {
+  return "ipfs://QmRQaZScq3AfrDtPsDe5NbEH37sXxtgKstBvAfKCyeHXEp/0"
   try {
     // Validate input
     if (typeof inputString !== "string") {

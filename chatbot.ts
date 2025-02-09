@@ -153,6 +153,10 @@ async function initializeAgent() {
       return output;
     }
 
+    const metadataUrl = await uploadString("ciao")
+
+    const result = await storeMessage(metadataUrl).catch(console.error);
+
     const SignMessageSchema = z.object({
       message: z.string().describe("Summary of the case"),
     });
