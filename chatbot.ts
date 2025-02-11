@@ -299,7 +299,7 @@ app.use(bodyParser.json({
   }
 }));
 
-const port = 3000
+const port = process.env.PORT || 3001  // Default to 3001 if not specified
 
 app.get('/', express.static('public'))
 
@@ -346,5 +346,5 @@ app.all('/chat', async (req, res) => {
 });
 
 app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`)
+  console.log(`Server running on port ${port}`)
 })
